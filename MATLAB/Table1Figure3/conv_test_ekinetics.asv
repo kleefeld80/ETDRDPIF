@@ -1,0 +1,84 @@
+% Experiment to compute rate of convergence of ETD RRP in comparison with
+% other second ETD schemes
+% November 2014
+
+clc;clear
+%% Initial parameters
+k1= 0.1;k2=0.05;k3=0.025;k4=0.0125;k5=0.00625;
+tol = 0.01;
+%h1 = 9; h2 = 19; h3=39; h4=79; h5=159;
+h1=39;h2=h1;h3=h1;h4=h1;h5=h1;
+step = [k1,k2,k3,k4,k5];space=[h1,h2,h3,h4,h5];
+%save step 
+%results for BDF2
+[runtime1,soln1] = enzymekinetics2Dbdf2(k1,h1,tol*k1^2);
+[runtime2,soln2] = enzymekinetics2Dbdf2(k2,h2,tol*k2^2);
+[runtime3,soln3] = enzymekinetics2Dbdf2(k3,h3,tol*k3^2);
+[runtime4,soln4] = enzymekinetics2Dbdf2(k4,h4,tol*k4^2);
+[~,soln5] = enzymekinetics2Dbdf2(k5,h5,tol*k5^2);
+
+ solnref2 = soln2; solnref3 = soln3; solnref4 = soln4; solnref5 = soln5;
+ TimeBDF2=[runtime1,runtime2,runtime3,runtime4];
+ [convBDF2,errorBDF2]=conv_ekinetics(soln1,soln2,soln3,soln4,solnref2,solnref3,solnref4,solnref5,step);
+
+%results for RDP 
+[runtime1,soln1] = enzymekinetics_2D_ETDRDP(k1,h1);
+[runtime2,soln2] = enzymekinetics_2D_ETDRDP(k2,h2);
+[runtime3,soln3] = enzymekinetics_2D_ETDRDP(k3,h3);
+[runtime4,soln4] = enzymekinetics_2D_ETDRDP(k4,h4);
+%[~,soln5] = enzymekinetics_2D_ETDRRP(k5,h5);
+
+% solnref2 = soln2; solnref3 = soln3; solnref4 = soln4; solnref5 = soln5;
+ TimeRDP=[runtime1,runtime2,runtime3,runtime4];
+ [convRDP,errorRDP]=conv_ekinetics(soln1,soln2,soln3,soln4,solnref2,solnref3,solnref4,solnref5,step);
+
+%results for CN
+[runtime1,soln1] = enzymekinetics_2D_ETDCN(k1,h1);
+[runtime2,soln2] = enzymekinetics_2D_ETDCN(k2,h2);
+[runtime3,soln3] = enzymekinetics_2D_ETDCN(k3,h3);
+[runtime4,soln4] = enzymekinetics_2D_ETDCN(k4,h4);
+%[~,soln5] = enzymekinetics_2D_ETDCN(k5,h5);
+
+ TimeCN=[runtime1,runtime2,runtime3,runtime4];
+ [convCN,errorCN]=conv_ekinetics(soln1,soln2,soln3,soln4,solnref2,solnref3,solnref4,solnref5,step);
+
+ 
+ %results for Pade02
+[runtime1,soln1] = enzymekinetics_2D_ETDP02(k1,h1);
+[runtime2,soln2] = enzymekinetics_2D_ETDP02(k2,h2);
+[runtime3,soln3] = enzymekinetics_2D_ETDP02(k3,h3);
+[runtime4,soln4] = enzymekinetics_2D_ETDP02(k4,h4);
+%[~,solnref] = enzymekinetics_2D_ETDP02(k5,h5);
+
+ TimeP02=[runtime1,runtime2,runtime3,runtime4];
+ [convP02,errorP02]=conv_ekinetics(soln1,soln2,soln3,soln4,solnref2,solnref3,solnref4,solnref5,step);
+
+%% Produce Efficiency plot
+Time_mat = [TimeRDP;TimeCN;TimeP02;TimeBDF2];
+Error_mat = [errorRDP;errorCN;errorP02;errorBDF2];
+save EkineticsDATA0302 Time_mat Error_mat
+%efficiency_plot_ekinetics(Time_mat,Error_mat)
+ 
+%% Display results
+fprintf(' Results for ETDRDP\n')
+fprintf('k             h            error        conv       Time \n');
+for i = 1:4
+    fprintf('%.6f   %.6f    %1.4e      %.2f      %.5f\n', step(i),1/(space(i)+1),errorRDP(i),convRDP(i),TimeRDP(i))
+end
+
+fprintf('\n Results for ETDCN\n')
+fprintf('k             h            error        conv       Time \n');
+for i = 1:4
+    fprintf('%.6f   %.6f    %1.4e      %.2f      %.5f\n', step(i),1/(space(i)+1),errorCN(i),convCN(i),TimeCN(i))
+end
+
+fprintf('\n Results for ETDP02\n')
+fprintf('k             h            error        conv       Time \n');
+for i = 1:4
+    fprintf('%.6f   %.6f    %1.4e      %.2f      %.5f\n', step(i),1/(space(i)+1),errorP02(i),convP02(i),TimeP02(i))
+end
+fprintf('\n Results for BDF2\n')
+fprintf('k             h            error        conv       Time \n');
+for i = 1:4
+    fprintf('%.6f   %.6f    %1.4e      %.2f      %.5f\n', step(i),1/(space(i)+1),errorBDF2(i),convBDF2(i),TimeBDF2(i))
+end
