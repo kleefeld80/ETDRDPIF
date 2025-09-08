@@ -39,13 +39,13 @@ B = zeros(2);
 B(1,2)=1; B(2,1)=-1;
 
 % 2D stacked diffusion matrix for each coordinate direction
-I1 = sparse(eye(steps));
+I1 = sparse(speye(steps));
 r=1/h^2;
 Ex = r*kron(I1,kron(A,B));
 Ey = r*kron(A,kron(I1,B));
 
 % Final matrices for U 
-I2 = sparse(eye(2*nnodes));
+I2 = sparse(speye(2*nnodes));
 r1 = 1/3; r2 = 1/4;
 Ex1 = (I2 + dt*Ex);
 Ex3 = (I2 + r1*dt*Ex);
